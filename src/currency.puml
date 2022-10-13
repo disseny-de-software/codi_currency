@@ -1,0 +1,102 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+class Customer {
+- name: String
+}
+
+class Portfolio {
++ findAccount(currency : String) : Account
+}
+
+Customer -right-> "1" Portfolio : "portfolio   "
+
+class Account {
+- currency : String
+- amount : double
++ add(anAmount : double)
++ subtract((anAmount : double)
+}
+
+Portfolio *-right-> "5" Account : "accounts   "
+
+abstract class Order {
+# dateTime : DateTime
+# done : boolean
++ {abstract} execute()
+}
+
+Order -up-> "1" Portfolio : "portfolio"
+
+class Buy extends Order {
+- amountCurrency : double
+- currency : String
++ execute()
+}
+
+class Sell extends Order {
+- amountCurrency : double
+- currency : String
++ execute()
+}
+
+class Trade extends Order {
+- amountCurrencyFrom : double
+- amountCurrencyTo : double
+- currencyFrom : String
+- currencyTo : String
+- strikePriceFrom : String
+- strikePriceTo : String
++ execute()
+}
+
+package java.util {
+class TimerTask {
++ {abstract} run()
+}
+class Timer {
++ scheduleAtFixedRate(\n\trepeatedTask : TimerTask, \n\tdelay : int , \n\tperiod : int)
+}
+}
+'Timer -[hidden]down- TimerTask
+
+java.util -[hidden]right-> OrderExecuter
+
+class OrderExecuter {
+- timer : Timer
+- repeatedTask : TimerTask
+- period : int
++ placeOrder(order : Order)
+}
+
+OrderExecuter *--left--> "*" Order : "      orders"
+
+class CurrencyConverter {
+- {static} currencies : String[]
+- {static} tableExchangeRates : <String, String, double>[]
++ {static} getExchangeRate(\n\tcurrencyFrom : String, \n\tcurrencyTo : String) : double
+}
+
+CurrencyConverter -[hidden]left- Buy
+CurrencyConverter -[hidden]left- Sell
+CurrencyConverter -[hidden]left- Trade
+Buy -[hidden]right- Sell
+java.util -[hidden]down- CurrencyConverter
+
+note right of OrderExecuter
+**invoker**
+end note
+
+note left of Order
+**abstract command**
+end note
+
+note left of Buy
+**concrete command**
+end note
+
+note top of Portfolio
+**receiver**
+end note
+
+@enduml
