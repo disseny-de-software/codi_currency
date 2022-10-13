@@ -47,4 +47,11 @@ public class OrderExecuter {
       System.out.println("Added order " + order);
     }
   }
+
+  public void cancelOrder(Order order) {
+    if (orders.contains(order)) {
+      orders.remove(order);
+      System.out.println("Order " + order + " removed by customer");
+    }
+  }
 }
