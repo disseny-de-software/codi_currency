@@ -13,6 +13,7 @@ import java.util.Random;
 public class CurrencyConverter {
   private static final String[] currencies = new String[] {"EUR", "GBP", "CHF", "JPY", "USD"};
   private static HashMap<String, HashMap<String, Double>> tableExchangeRates = new HashMap<>();
+  private static String dateLastUpdate;
 
   public CurrencyConverter() throws IOException {
     for (String currencyFrom : currencies) {
@@ -46,7 +47,6 @@ public class CurrencyConverter {
     // but needs an API key, updated every hour
     String url_str_base = "https://open.er-api.com/v6/latest/"; // append currency here like USD
     // no API key needed but updated only once per day
-    boolean firstTime = true;
     for (String currencyFrom : currencies) {
       // Making Request
       URL url = new URL(url_str_base + currencyFrom);
@@ -56,16 +56,13 @@ public class CurrencyConverter {
       JsonElement root = jp.parse(new InputStreamReader((InputStream) request.getContent()));
       JsonObject jsonobj = root.getAsJsonObject();
       //System.out.println(jsonobj);
-      if (firstTime) {
-        System.out.println("time of last update " + jsonobj.get("time_last_update_utc").getAsString() + " UTC");
-        firstTime = false;
-      }
+      dateLastUpdate = jsonobj.get("time_last_update_utc").getAsString() + " UTC";
       assert jsonobj.get("result").getAsString() == "success";
       JsonObject rates = jsonobj.getAsJsonObject("rates");
       for (String currencyTo : currencies) {
         if (currencyFrom != currencyTo) {
           double rate = rates.get(currencyTo).getAsDouble();
-          System.out.println("1 " + currencyFrom + " = " +  rate + " " + currencyTo);
+          //System.out.println("1 " + currencyFrom + " = " +  rate + " " + currencyTo);
           tableExchangeRates.get(currencyFrom).put(currencyTo, rate);
         }
       }
@@ -78,7 +75,7 @@ public class CurrencyConverter {
 
   @Override
   public String toString() {
-    String res = "";
+    String res = dateLastUpdate + "\n";
     for (String currencyFrom : currencies) {
       for (String currencyTo : currencies) {
         if (currencyTo != currencyFrom) {
